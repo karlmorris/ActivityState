@@ -2,9 +2,8 @@ package edu.temple.activitystate
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
+import android.widget.*
+import androidx.lifecycle.ViewModelProvider
 
 class MainActivity : AppCompatActivity() {
 
@@ -21,15 +20,31 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+
         // Fetch info from saveInstanceState, but only if it's not-null
         // argument will be null first time activity loads, and will continue
         // to be null if we do not store items in bundle argument of
         // onSaveInstanceState()
-        savedInstanceState?.run {
-            person = Person(getString(KEY_PERSON)!!)
+        savedInstanceState?.getString(KEY_PERSON)?.run {
+            person = Person(this)
         }
 
         val nameEditText = findViewById<EditText>(R.id.editTextTextPersonName)
+        val imageView = findViewById<ImageView>(R.id.imageView)
+
+        findViewById<ToggleButton>(R.id.toggleButton).setOnCheckedChangeListener { _, p1 ->
+            mainViewModel.setImageId(
+                if (p1) R.drawable.cat2 else R.drawable.cat1
+            )
+        }
+
+
+        // Observe changes to LiveData object stored in ViewModel
+        // and update UI when changes occur
+        mainViewModel.getImageId().observe(this) {
+            imageView.setImageResource(it)
+        }
 
         findViewById<Button>(R.id.saveButton).setOnClickListener {
             person = Person(nameEditText.text.toString())
@@ -46,7 +61,9 @@ class MainActivity : AppCompatActivity() {
     // You can use one, but probably not both - Nothing will break, it's just inefficient
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        person = Person(savedInstanceState.getString(KEY_PERSON)!!)
+        savedInstanceState.getString(KEY_PERSON)?.run {
+            person = Person(this)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
