@@ -25,8 +25,8 @@ class MainActivity : AppCompatActivity() {
         // argument will be null first time activity loads, and will continue
         // to be null if we do not store items in bundle argument of
         // onSaveInstanceState()
-        savedInstanceState?.run {
-            person = Person(getString(KEY_PERSON)!!)
+        savedInstanceState?.getString(KEY_PERSON)?.run {
+            person = Person(this)
         }
 
         val nameEditText = findViewById<EditText>(R.id.editTextTextPersonName)
@@ -46,7 +46,9 @@ class MainActivity : AppCompatActivity() {
     // You can use one, but probably not both - Nothing will break, it's just inefficient
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        person = Person(savedInstanceState.getString(KEY_PERSON)!!)
+        savedInstanceState.getString(KEY_PERSON)?.run {
+            person = Person(this)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
